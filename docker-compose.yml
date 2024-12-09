@@ -1,0 +1,13 @@
+services:
+  number_plate_detection:
+    build: .
+    container_name: number_plate_detection_service
+    volumes:
+      - .:/usr/src/app/  # Mount volume to persist data if needed
+      - /home/admin/storage:/home/admin/storage
+      - /home/admin/config:/home/admin/config
+    restart: always
+    tty: true  # Keep the container running for debugging
+
+
+
