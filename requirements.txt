@@ -96,3 +96,4 @@ tzdata==2024.2
 urllib3==2.2.3
 visualdl==2.5.3
 Werkzeug==3.0.4
+ultralytics

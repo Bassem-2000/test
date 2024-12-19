@@ -14,7 +14,7 @@ import numpy as np
 import cv2
 from queue import Queue
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-from constants import (NUMBER_PLATE_DETECTION_SCORE, CLIPS_PATH, RECORDINGS_PATH, FRIGATE_SERVER_ADDRESS, CSV_FILE_PATH, MODEL_PATH)
+from constants import (NUMBER_PLATE_DETECTION_SCORE, CLIPS_PATH, RECORDINGS_PATH, FRIGATE_SERVER_ADDRESS, CSV_FILE_PATH, MODEL_PATH, YOLO_MODEL, TIME_DURATION)
 from constants import *
 import onnxruntime as ort
 import cv2
@@ -25,6 +25,8 @@ import csv
 from paddleocr import PaddleOCR
 import csv
 import jellyfish
+
+from ultralytics import YOLO
 
 ocr = PaddleOCR(use_angle_cls=True, lang='en')  # PaddleOCR with angle classification for English
 # Define the CSV file path
@@ -66,44 +68,44 @@ class_names = ['parcel', 'number plate', 'car']
 conf_threshold = NUMBER_PLATE_DETECTION_SCORE
 
 
-def generate_number_plate_bbox (event_id, event_data, cam_name):
-    global camera_name, car_bbox
-    camera_name = cam_name
-    file_path_main_image = os.path.join(CLIPS_PATH, f"{camera_name}-{event_id}-number-plate.png")
-    try:
+# def generate_number_plate_bbox (event_id, event_data, cam_name):
+#     global camera_name, car_bbox
+#     camera_name = cam_name
+#     file_path_main_image = os.path.join(CLIPS_PATH, f"{camera_name}-{event_id}-number-plate.png")
+#     try:
 
-        read_attempts = 5
-        interval_seconds = 1
+#         read_attempts = 5
+#         interval_seconds = 1
 
-        for attempt in range(read_attempts):
-            start_time = time.time()
-            img = cv2.imread(file_path_main_image)
+#         for attempt in range(read_attempts):
+#             start_time = time.time()
+#             img = cv2.imread(file_path_main_image)
             
-            if img is None:
-                print(f"Attempt {attempt + 1}: Image not found.")
-            else:
-                print(f"Attempt {attempt + 1}: Image read successfully.")
-                break
-            # Use a time-based loop to wait for 5 seconds without using sleep
-            while time.time() - start_time < interval_seconds:
-                pass
+#             if img is None:
+#                 print(f"Attempt {attempt + 1}: Image not found.")
+#             else:
+#                 print(f"Attempt {attempt + 1}: Image read successfully.")
+#                 break
+#             # Use a time-based loop to wait for 5 seconds without using sleep
+#             while time.time() - start_time < interval_seconds:
+#                 pass
 
-        if img is None:
-            print("[Number-plate-detection] - Image not loaded. Check the path")
-            return False, None
-        else:
-            print("[Number-plate-detection] - Recevied call for number plate recognition: ", event_id)
-            car_bbox = event_data['snapshot']['box']  
-            print(car_bbox)
-            file_path, best_match_name, ocr_text = main_processing(img, event_id,event_data)
-            print("[Number-plate-detection] - File path found: ", file_path)
-            print("[Number-plate-detection] - Best match name found: ", best_match_name)
-            print("[Number-plate-detection] - Ocr text found: ", ocr_text)
-            #car_bbox = event_data['snapshot']['box']
-            return file_path, best_match_name, ocr_text
-    except:
-        print("[Number-plate-detection] - Error in image reading")
-        return False, None , None
+#         if img is None:
+#             print("[Number-plate-detection] - Image not loaded. Check the path")
+#             return False, None
+#         else:
+#             print("[Number-plate-detection] - Recevied call for number plate recognition: ", event_id)
+#             car_bbox = event_data['snapshot']['box']  
+#             print(car_bbox)
+#             file_path, best_match_name, ocr_text = main_processing(img, event_id,event_data)
+#             print("[Number-plate-detection] - File path found: ", file_path)
+#             print("[Number-plate-detection] - Best match name found: ", best_match_name)
+#             print("[Number-plate-detection] - Ocr text found: ", ocr_text)
+#             #car_bbox = event_data['snapshot']['box']
+#             return file_path, best_match_name, ocr_text
+#     except:
+#         print("[Number-plate-detection] - Error in image reading")
+#         return False, None , None
 
 # Perform inference
 def run_inference(session, img_tensor):
@@ -332,3 +334,6 @@ def main_processing(img, event_id, event_data):
         best_match_name = None
         ocr_text = None
         return file_path, best_match_name, ocr_text
+    
+
+

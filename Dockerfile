@@ -25,6 +25,7 @@ RUN pip install paddleocr==2.7.3
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Expose the port for MQTT (default port is 1883)
 EXPOSE 1883
 

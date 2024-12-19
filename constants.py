@@ -9,7 +9,7 @@ MQTT_TOPIC = "frigate/events"
 NUMBER_PLATE_DATA_TOPIC = "frigate/number_plate_data"
 LICENCE_RECOGNITION_DETECTIONS_TOPIC = "licence_recognition/detections"
 
-
+TIME_DURATION = 2
 # Paths  
 
 
@@ -17,13 +17,17 @@ FRIGATE_SERVER_ADDRESS = "http://jupyter-PoC:5000"
 
 #FRIGATE_SERVER_ADDRESS = "http://" + BROKER_HOST + ":5000"
 
-FRIGATE_DB_PATH = "/home/admin/config/frigate.db"  
-EVENTS_DB_PATH = "/home/admin/config/events.db"  
-CLIPS_PATH = "/home/admin/storage/clips/"  
-RECORDINGS_PATH = "/home/admin/storage/recordings/"  
+FRIGATE_DB_PATH = "/home/admin/config/frigate.db" #     
+EVENTS_DB_PATH =  "/home/admin/config/events.db"  #
+CLIPS_PATH =  "/home/admin/storage/clips/"   # 
+RECORDINGS_PATH = "/home/admin/storage/recordings/"  # 
 
 #Number Plate detection
 MODEL_PATH = "best_v3_final.onnx"
+
+# yolov8s_QUInt8.onnx , yolov8s.onnx, yolov8s_Float16.onnx, yolov8s_tflit\yolov8s_float16.tflite
+YOLO_MODEL = r"yolov8s_tflit\yolov8s_float32.tflite" 
+
 NUMBER_PLATE_DETECTION_SCORE = 0.55
 CSV_FILE_PATH = 'input.csv'
 
@@ -45,3 +49,12 @@ EVENT_TABLE_SCHEMA = """
         parcel_status TEXT
         )
         """
+PROCESSING_TABLE_SCHEMA = """
+    CREATE TABLE IF NOT EXISTS processing (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id TEXT NOT NULL,
+        status TEXT NOT NULL, -- "parking" or "approaching" or "departing",
+        status_time REAL NOT NULL,
+        FOREIGN KEY(event_id) REFERENCES event(id)
+    )
+"""
